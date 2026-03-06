@@ -1,5 +1,6 @@
 package de.bund.bva.isyfact.batchrahmen.test;
 
+import ch.qos.logback.classic.LoggerContext;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.resetAllRequests;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
@@ -34,8 +35,6 @@ import de.bund.bva.isyfact.batchrahmen.batch.rahmen.BatchStartTyp;
 import de.bund.bva.isyfact.batchrahmen.config.AbstractOidcProviderTest;
 import de.bund.bva.isyfact.batchrahmen.core.launcher.BatchLauncher;
 import de.bund.bva.isyfact.security.authentication.ClaimsOnlyOAuth2Token;
-
-import ch.qos.logback.classic.LoggerContext;
 
 
 @SpringBootTest(classes = AnwendungTestConfig.class)

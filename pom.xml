@@ -243,7 +243,7 @@
     </repositories>
 
     <build>
-       <pluginManagement>
+        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -463,8 +463,8 @@
                     </executions>
                 </plugin>
             </plugins>
-       </pluginManagement>
-       <plugins>
+        </pluginManagement>
+        <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>tidy-maven-plugin</artifactId>
