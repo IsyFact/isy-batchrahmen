@@ -3,7 +3,7 @@ on:
   push:
     branches:
       - develop
-      - release/**
+      - support/**
     paths:
       - pom.xml
 

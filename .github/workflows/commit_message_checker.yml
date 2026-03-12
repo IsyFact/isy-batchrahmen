@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - develop
-      - release/**
+      - support/**
       - hotfix/**
       - feature/**
       - bugfix/**
