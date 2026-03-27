@@ -48,7 +48,7 @@
         <enforced.jdk.version>[25,26)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
 
-        <spring-boot.version>3.5.12</spring-boot.version>
+        <spring-boot.version>3.5.13</spring-boot.version>
         <isy-exception-core.version>5.0.0-SNAPSHOT</isy-exception-core.version>
         <isy-security-test.version>5.0.0-SNAPSHOT</isy-security-test.version>
         <isy-security.version>5.0.0-SNAPSHOT</isy-security.version>
