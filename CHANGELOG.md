@@ -3,3 +3,4 @@
 - `IFS-4753`: Änderung der Konfigurationsreihenfolge.
   * BatchSecurityConfiguration wird nach Anwendung und BatchRahmen Konfiguration geladen.
   * Beans mit der `@ConditionalOnMissingBean(...)` Annotation können wie erwartet überschrieben werden.
+- `IFS-5263`: Update auf Spring Boot 4
