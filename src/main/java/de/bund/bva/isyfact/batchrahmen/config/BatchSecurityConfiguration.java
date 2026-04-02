@@ -2,6 +2,7 @@ package de.bund.bva.isyfact.batchrahmen.config;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
 import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -46,6 +47,8 @@ import java.util.List;
 @Configuration
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
 @ConditionalOnClass({ClientRegistration.class, EnableWebSecurity.class})
+//@Conditional(ClientsConfiguredCondition.class)
+@ConditionalOnProperty(name = "spring.security.oauth2.client")
 public class BatchSecurityConfiguration {
 
     @Bean
