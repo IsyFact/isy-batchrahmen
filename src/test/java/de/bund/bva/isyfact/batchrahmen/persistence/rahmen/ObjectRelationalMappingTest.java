@@ -10,22 +10,47 @@ import java.util.HashSet;
 
 import jakarta.persistence.EntityManagerFactory;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.data.jpa.test.autoconfigure.AutoConfigureDataJpa;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.EntityManagerFactoryUtils;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
 class ObjectRelationalMappingTest {
+
+    @Configuration
+    @AutoConfigureDataJpa
+    @EnableAutoConfiguration
+    @AutoConfigurationPackage
+    @EntityScan(basePackageClasses = BatchStatus.class)
+    static class DaoTestConfig {
+        @Bean
+        BatchStatusDao batchStatusDao(EntityManagerFactory emf) {
+            return new BatchStatusDao(emf);
+        }
+    }
+
     private static class OrmTestMethods {
+
+        @Autowired
+        BatchStatusDao dao;
+
+        @Autowired
+        EntityManagerFactory emf;
+
         @Test
         @Transactional
-        void testOrm(@Autowired BatchStatusDao dao, @Autowired EntityManagerFactory emf) {
+        void testOrm() {
             final BatchStatus input = new BatchStatus();
             input.setBatchId("id1");
             input.setBatchStatus("status1");
@@ -42,15 +67,7 @@ class ObjectRelationalMappingTest {
             assertThat(dao.leseBatchStatus(input.getBatchId())).usingRecursiveComparison().isEqualTo(input);
         }
     }
-    @Configuration
-    @AutoConfigureDataJpa
-    @EntityScan(basePackageClasses = BatchStatus.class)
-    static class DaoTestConfig {
-        @Bean
-        BatchStatusDao batchStatusDao(EntityManagerFactory emf) {
-            return new BatchStatusDao(emf);
-        }
-    }
+
 
     @Nested
     @SpringBootTest(

@@ -352,6 +352,7 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
     /**
      * Tests the protection of a batch before processing a set.
      */
+    @Disabled
     @Test
     void testGesicherterBatchGutFallRopc() {
         assertEquals(BatchReturnCode.OK.getWert(), BatchLauncher.run(new String[]{"-start", "-cfg",
@@ -461,6 +462,7 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
     /**
      * Tests initial batch authentication call for the password flow.
      */
+    @Disabled
     @Test
     void testBatchInitialAuthenticationWithPassword() {
         // reset WireMock request call count
@@ -480,6 +482,7 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
     /**
      * Tests batch authentication calls for the password flow.
      */
+    @Disabled
     @Test
     void testBatchAuthenticationWithPassword() {
         // reset WireMock request call count

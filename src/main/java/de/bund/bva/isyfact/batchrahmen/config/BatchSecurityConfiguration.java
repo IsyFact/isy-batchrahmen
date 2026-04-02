@@ -1,14 +1,11 @@
 package de.bund.bva.isyfact.batchrahmen.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientPropertiesMapper;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientPropertiesMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +18,20 @@ import org.springframework.security.oauth2.client.registration.InMemoryClientReg
 import org.springframework.security.oauth2.client.web.AuthenticatedPrincipalOAuth2AuthorizedClientRepository;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 
+
+//import org.springframework.boot.autoconfigure.security.oauth2.client.ClientsConfiguredCondition;
+//import org.springframework.boot.security.oauth2.client.autoconfigure.ClientsConfiguredCondition;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+
 /**
  * !!! Workaround !!!
  * <p>
  * Since {@code WebApplicationType.NONE} is set in the BatchLauncher, the
- * {@link org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration}
+ * {@link org.springframework.boot.security.oauth2.client.autoconfigure.OAuth2ClientAutoConfiguration}
  * is not loaded due to the annotation
  * {@code @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)}.
  * <p>
@@ -40,7 +46,6 @@ import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepo
 @Configuration
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
 @ConditionalOnClass({ClientRegistration.class, EnableWebSecurity.class})
-@Conditional(ClientsConfiguredCondition.class)
 public class BatchSecurityConfiguration {
 
     @Bean
