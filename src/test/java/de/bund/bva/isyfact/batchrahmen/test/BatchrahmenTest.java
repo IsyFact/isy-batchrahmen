@@ -18,9 +18,15 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Optional;
 
+import jakarta.annotation.PostConstruct;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.test.annotation.DirtiesContext;
 
 import de.bund.bva.isyfact.batchrahmen.AnwendungTestConfig;
 import de.bund.bva.isyfact.batchrahmen.batch.rahmen.BatchReturnCode;
@@ -48,26 +55,23 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Value("${spring.security.oauth2.client.registration.ropc-testclient.client-id}")
-    private String ropcClientId;
-
-    @Value("${spring.security.oauth2.client.registration.ropc-testclient.client-secret}")
-    private String ropcClientSecret;
-
-    @Value("${isy.security.oauth2.client.registration.ropc-testclient.username}")
-    private String ropcUser;
-
-    @Value("${isy.security.oauth2.client.registration.ropc-testclient.password}")
-    private String ropcPassword;
-
-    @Value("${isy.security.oauth2.client.registration.ropc-testclient.bhknz}")
-    private String ropcBhknz;
-
-    @Value("${spring.security.oauth2.client.registration.cc-testclient.client-id}")
-    private String ccClientId;
-
-    @Value("${spring.security.oauth2.client.registration.cc-testclient.client-secret}")
-    private String ccClientSecret;
+    public BatchrahmenTest(
+            @Value("${spring.security.oauth2.client.registration.ropc-testclient.client-id}") String ropcClientId,
+            @Value("${spring.security.oauth2.client.registration.ropc-testclient.client-secret}") String ropcClientSecret,
+            @Value("${spring.security.oauth2.client.registration.cc-testclient.client-id}") String ccClientId,
+            @Value("${spring.security.oauth2.client.registration.cc-testclient.client-secret}") String ccClientSecret
+    ) {
+        embeddedOidcProvider.addClient(
+                ropcClientId,
+                ropcClientSecret,
+                Collections.singleton("Anwender")
+        );
+        embeddedOidcProvider.addClient(
+                ccClientId,
+                ccClientSecret,
+                Collections.singleton("Anwender")
+        );
+    }
 
     @BeforeEach
     public void setup() {
@@ -77,23 +81,6 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
             ERGEBNIS_DATEI = new File(
                     BatchrahmenTest.class.getResource("/resources/batch/ausgabe/ergebnisdatei.xml").toURI())
                     .getAbsolutePath();
-
-            embeddedOidcProvider.removeAllClients();
-            embeddedOidcProvider.removeAllUsers();
-            // client with authorization-grant-type=password
-            embeddedOidcProvider.addUser(
-                    ropcClientId,
-                    ropcClientSecret,
-                    ropcUser,
-                    ropcPassword,
-                    Optional.of(ropcBhknz),
-                    Collections.singleton("Anwender")
-            );
-            embeddedOidcProvider.addClient(
-                    ccClientId,
-                    ccClientSecret,
-                    Collections.singleton("Anwender")
-            );
 
         } catch (URISyntaxException e) {
             fail(e.getMessage());
@@ -352,7 +339,6 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
     /**
      * Tests the protection of a batch before processing a set.
      */
-    @Disabled
     @Test
     void testGesicherterBatchGutFallRopc() {
         assertEquals(BatchReturnCode.OK.getWert(), BatchLauncher.run(new String[]{"-start", "-cfg",
@@ -457,48 +443,6 @@ class BatchrahmenTest extends AbstractOidcProviderTest {
         Jwt token = assertInstanceOf(Jwt.class, SecurityContextHolder.getContext().getAuthentication().getCredentials());
         assertEquals(getIssuerLocation(), token.getIssuer().toString());
         assertEquals("cc-testclient-id", token.getClaimAsString("azp"));
-    }
-
-    /**
-     * Tests initial batch authentication call for the password flow.
-     */
-    @Disabled
-    @Test
-    void testBatchInitialAuthenticationWithPassword() {
-        // reset WireMock request call count
-        resetAllRequests();
-
-        assertEquals(BatchReturnCode.OK.getWert(), BatchLauncher.run(new String[]{"-start", "-cfg",
-                "/resources/batch/basic-test-batch-authenticated-ropc-config.properties"}));
-
-        // should be called 1 time for initial authentication, because the token is still valid for each batch step
-        verify(1, postRequestedFor(urlMatching(ISSUER_PATH + ".*")));
-
-        Jwt token = assertInstanceOf(Jwt.class, SecurityContextHolder.getContext().getAuthentication().getCredentials());
-        assertEquals(getIssuerLocation(), token.getIssuer().toString());
-        assertEquals("ropc-testclient-id", token.getClaimAsString("azp"));
-    }
-
-    /**
-     * Tests batch authentication calls for the password flow.
-     */
-    @Disabled
-    @Test
-    void testBatchAuthenticationWithPassword() {
-        // reset WireMock request call count
-        resetAllRequests();
-
-        assertEquals(BatchReturnCode.OK.getWert(), BatchLauncher.run(new String[]{"-start", "-cfg",
-                "/resources/batch/basic-authentication-test-batch-authenticated-ropc-config.properties"}));
-
-        // should be called 11 (1 + 10 + 1) times, because oauth2MinimumTokenValidity is set to the value of
-        // tokenLifespan, meaning re-authentication should be done for each step of the batch
-        // 1x initialisiere, 10x verarbeite, 1x beende
-        verify(12, postRequestedFor(urlMatching(ISSUER_PATH + ".*")));
-
-        Jwt token = assertInstanceOf(Jwt.class, SecurityContextHolder.getContext().getAuthentication().getCredentials());
-        assertEquals(getIssuerLocation(), token.getIssuer().toString());
-        assertEquals("ropc-testclient-id", token.getClaimAsString("azp"));
     }
 
     /**
