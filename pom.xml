@@ -48,7 +48,7 @@
         <enforced.jdk.version>[25,26)</enforced.jdk.version>
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
 
-        <spring-boot.version>3.5.13</spring-boot.version>
+        <spring-boot.version>4.0.5</spring-boot.version>
         <isy-exception-core.version>5.0.0-SNAPSHOT</isy-exception-core.version>
         <isy-security-test.version>5.0.0-SNAPSHOT</isy-security-test.version>
         <isy-security.version>5.0.0-SNAPSHOT</isy-security.version>
@@ -127,7 +127,24 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-security-oauth2-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
@@ -218,10 +235,6 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-config</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.annotation</groupId>
