@@ -51,7 +51,7 @@
         <spring-boot.version>4.0.6</spring-boot.version>
         <isy-exception-core.version>5.0.0</isy-exception-core.version>
         <isy-security-test.version>5.0.1</isy-security-test.version>
-        <isy-security.version>5.0.0-SNAPSHOT</isy-security.version>
+        <isy-security.version>5.0.1</isy-security.version>
         <isy-logging.version>5.0.0</isy-logging.version>
         <isy-checkstyle-config.version>0.2.0</isy-checkstyle-config.version>
         <commons-cli.version>1.11.0</commons-cli.version>
