@@ -1,12 +1,16 @@
-# v1.8.0
-- `IFS-47`: Korrelations-ID für jede Satzverarbeitung
+# 5.0.0
+### Features
+- `IFS-5259`: Maximale Anzahl automatischer Neustarts für fehlerhafte Batches konfigurierbar.
+  * Über den Konfigurationsparameter `Batchrahmen.MaxWiederholungen` kann eine Obergrenze für automatische Neustarts festgelegt werden.
+  * Bei Überschreitung wird eine `BatchrahmenMaxWiederholungenException` geworfen, die nur auf Info-Niveau geloggt wird.
+  * Ist der Parameter nicht oder auf eine negative Nummer gesetzt, gibt es keine Begrenzung der Neustarts.
 
-# v1.7.0
-- `RF-161`: Bibliotheken binden genutzte Bibliotheken direkt ein und nicht mehr über BOM-Bibliotheken
-- `IFS-66`: Im Status "Abbruch" kann ein neuer Lauf nur mit "Restart" erfolgen, auch wenn im abgebrochenen Lauf zuvor kein Satz verarbeitet wurde.
+### Bug Fixes
+- `IFS-4753`: Änderung der Konfigurationsreihenfolge.
+  * BatchSecurityConfiguration wird nach Anwendung und BatchRahmen Konfiguration geladen.
+  * Beans mit der `@ConditionalOnMissingBean(...)` Annotation können wie erwartet überschrieben werden.
 
-# v1.6.0
-- `IFS-17`: Umbenennung der Artifact-ID und Group-ID
-
-# v1.5.3
-- `IFS-5`: Der Isy-Batchrahmen verweist auf "Register".
+### BREAKING CHANGES
+- `IFS-5263`: Update auf Spring Boot 4
+  - Password-Authorization wird nicht mehr unterstützt. Es ist stattdessen Client-Secret-Authorization zu nutzen. 
+    Hierfür sind die betroffenden Accounts auf Service-Accounts umzustellen.

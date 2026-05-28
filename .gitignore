@@ -1,2 +1,29 @@
+# Ignore Eclipse project and build files
+.project
+.classpath
+.metadata
+bin/
+.settings/
+
+# Ignore IntelliJ project and build files
+*.iml
 .idea/
+/out/
+
+# Ignore Java-specific files
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# Ignore Maven-specific files
 target/
+.flattened-pom.xml
+
+# Ignore diagrams.net-specific files
+*.dn.svg.bkp
+*.xml.bkp
+
+# Ignore OS-specific files
+.DS_Store
