@@ -49,7 +49,7 @@
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
 
         <spring-boot.version>4.0.6</spring-boot.version>
-        <isy-exception-core.version>5.0.0</isy-exception-core.version>
+        <isy-exception-core.version>5.0.1</isy-exception-core.version>
         <isy-security-test.version>5.0.1</isy-security-test.version>
         <isy-security.version>5.0.1</isy-security.version>
         <isy-logging.version>5.0.0</isy-logging.version>
