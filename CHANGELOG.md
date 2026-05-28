@@ -1,4 +1,4 @@
-# 5.0.0
+# 5.0.1
 ### Features
 - `IFS-5259`: Maximale Anzahl automatischer Neustarts für fehlerhafte Batches konfigurierbar.
   * Über den Konfigurationsparameter `Batchrahmen.MaxWiederholungen` kann eine Obergrenze für automatische Neustarts festgelegt werden.
