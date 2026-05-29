@@ -8,6 +8,7 @@
     <packaging>jar</packaging>
 
     <name>IsyFact-Batchrahmen</name>
+    <description>Komponente für die Batchausführung in IsyFact-Anwendungen.</description>
     <url>http://isyfact.de</url>
     <licenses>
         <license>
