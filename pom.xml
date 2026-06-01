@@ -38,7 +38,7 @@
         <maven.compiler.release>25</maven.compiler.release>
         <maven.compiler.version>3.15.0</maven.compiler.version>
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
-        <maven.surefire.version>3.5.5</maven.surefire.version>
+        <maven.surefire.version>3.5.6</maven.surefire.version>
         <maven.javadoc.plugin.version>3.12.0</maven.javadoc.plugin.version>
         <maven.jar.version>3.5.0</maven.jar.version>
         <maven.source.plugin.version>3.4.0</maven.source.plugin.version>
@@ -51,10 +51,10 @@
         <enforced.maven.version>[3.6.3,4)</enforced.maven.version>
 
         <spring-boot.version>4.0.6</spring-boot.version>
-        <isy-exception-core.version>5.0.0</isy-exception-core.version>
+        <isy-exception-core.version>5.0.1</isy-exception-core.version>
         <isy-security-test.version>5.0.1</isy-security-test.version>
         <isy-security.version>5.0.1</isy-security.version>
-        <isy-logging.version>5.0.0</isy-logging.version>
+        <isy-logging.version>5.0.1</isy-logging.version>
         <isy-checkstyle-config.version>0.2.0</isy-checkstyle-config.version>
         <commons-cli.version>1.11.0</commons-cli.version>
 
