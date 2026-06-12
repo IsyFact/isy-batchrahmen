@@ -1,6 +1,11 @@
 package de.bund.bva.isyfact.batchrahmen.core.launcher;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
@@ -16,6 +21,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.client.ClientAuthorizationException;
+
+import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 import de.bund.bva.isyfact.batchrahmen.batch.exception.BatchAusfuehrungsException;
 import de.bund.bva.isyfact.batchrahmen.batch.konfiguration.BatchKonfiguration;
@@ -36,10 +43,6 @@ import de.bund.bva.isyfact.batchrahmen.core.rahmen.Batchrahmen;
 import de.bund.bva.isyfact.logging.IsyLogger;
 import de.bund.bva.isyfact.logging.IsyLoggerFactory;
 import de.bund.bva.isyfact.logging.LogKategorie;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
  * This class starts a batch (see {@link Batchrahmen} with the transferred configuration.
@@ -64,11 +67,28 @@ public class BatchLauncher {
     private BatchErgebnisProtokoll protokoll;
 
     /**
-     * Main method for starting batch. This method calls the method {@link #run(String[])} und return its ReturnCode via System.exit().
+     * Main method for starting batch. This method calls the method {@link #start(String[])} which returns its
+     * returnCode via System.exit().
+     * Prefer using {@link #start(String[])} when calling programmatically.
      *
      * @param args command line parameters.
      */
     public static void main(String[] args) {
+        IsyLogger log = IsyLoggerFactory.getLogger(BatchLauncher.class);
+        log.info(LogKategorie.JOURNAL, BatchRahmenEreignisSchluessel.EPLBAT00001,
+                "Der direkte Aufruf von BatchLauncher als Main-Class ist veraltet "
+                        + "und wird in einer zukünftigen Version entfernt. "
+                        + "Verwenden Sie stattdessen die Main-Class der Anwendung "
+                        + "und rufen Sie BatchLauncher.start(args) auf.");
+        start(args);
+    }
+
+    /**
+     * Method for starting batch. This method calls the method {@link #run(String[])} and returns its ReturnCode via System.exit().
+     *
+     * @param args command line parameters.
+     */
+    public static void start(String[] args) {
         System.exit(BatchLauncher.run(args));
     }
 
@@ -118,7 +138,6 @@ public class BatchLauncher {
             if (log != null) {
                 log.info(LogKategorie.JOURNAL, ex.getAusnahmeId(), ex.getMessage());
             }
-            IO.print(ex.getMessage());
             returnCode = ex.getReturnCode();
         } catch (BatchrahmenException ex) {
             protokolliereFehler(log, protokoll, ex);
@@ -135,7 +154,6 @@ public class BatchLauncher {
                 protokoll.batchEnde();
             }
         }
-        IO.print(returnCode.getWert() + ": " + returnCode.getText());
         return returnCode.getWert();
     }
 
@@ -201,8 +219,18 @@ public class BatchLauncher {
         String propertyFile =
                 konf.getAsString(KonfigurationSchluessel.PROPERTY_BATCHRAHMEN_LOGBACK_CONF,
                         "/config/logback-batch.xml");
-        URL configLocation = BatchLauncher.class.getResource(propertyFile);
-        if (configLocation == null) {
+        String commandLinePath =
+                konf.getAsString(KonfigurationSchluessel.KOMMANDO_PARAM_LOGBACK_KONFIGURATION,
+                        null);
+
+        // 1. logback-batch.xml in filesystem
+        File file = commandLinePath != null ? new File(commandLinePath) : null;
+        boolean isFile = file != null && file.exists();
+
+        // 2. logback-batch.xml in classpath
+        URL configLocation = isFile ? null : BatchLauncher.class.getResource(propertyFile);
+
+        if (!isFile && configLocation == null) {
             throw new BatchrahmenInitialisierungException(NachrichtenSchluessel.ERR_KONF_DATEI_LESEN,
                     propertyFile);
         }
@@ -211,7 +239,12 @@ public class BatchLauncher {
         jc.setContext(context);
         context.reset(); // override default configuration
         context.putProperty("BatchId", konf.getAsString(KonfigurationSchluessel.PROPERTY_BATCH_ID));
-        jc.doConfigure(configLocation);
+
+        if (isFile) {
+            jc.doConfigure(file);
+        } else {
+            jc.doConfigure(configLocation);
+        }
     }
 
     /**
@@ -234,7 +267,6 @@ public class BatchLauncher {
      * @throws BatchAusfuehrungsException When an error occurs during batch execution.
      */
     private void launch() throws BatchAusfuehrungsException {
-
         List<Class> configs = new ArrayList<>();
         try {
             for (final String name : rahmenKonfiguration.getAnwendungSpringKonfigFiles()) {
@@ -249,21 +281,22 @@ public class BatchLauncher {
             throw new BatchAusfuehrungsException(NachrichtenSchluessel.ERR_KLASSE_NICHT_GEFUNDEN, e);
         }
 
-        ConfigurableApplicationContext
-                rahmen = new SpringApplicationBuilder().sources(configs.toArray(new Class[0]))
-                .bannerMode(Banner.Mode.OFF)
-                .properties("isy.batchrahmen.batch-context=true")
-                .web(WebApplicationType.NONE)
-                .registerShutdownHook(true)
-                .profiles(rahmenKonfiguration.getSpringProfiles())
-                .initializers(_ -> {
-                    try {
-                        initialisiereLogback(rahmenKonfiguration);
-                    } catch (JoranException e) {
-                        System.err.println(e.getMessage());
-                    }
-                })
-                .run();
+        ConfigurableApplicationContext rahmen =
+                new SpringApplicationBuilder()
+                        .sources(configs.toArray(new Class[0]))
+                        .bannerMode(Banner.Mode.OFF)
+                        .properties("isy.batchrahmen.batch-context=true")
+                        .web(WebApplicationType.NONE)
+                        .registerShutdownHook(true)
+                        .profiles(rahmenKonfiguration.getSpringProfiles())
+                        .initializers(_ -> {
+                            try {
+                                initialisiereLogback(rahmenKonfiguration);
+                            } catch (JoranException e) {
+                                System.err.println(e.getMessage());
+                            }
+                        })
+                        .run(ermittleSpringArguments());
 
         String rahmenBeanName =
                 this.rahmenKonfiguration.getAsString(KonfigurationSchluessel.PROPERTY_BATCHRAHMEN_BEAN_NAME,
@@ -274,5 +307,20 @@ public class BatchLauncher {
         } finally {
             rahmen.close();
         }
+    }
+
+    private String[] ermittleSpringArguments() {
+        List<String> args = new ArrayList<>();
+
+        String configDirectory =
+                rahmenKonfiguration.getAsString(
+                        KonfigurationSchluessel.KOMMANDO_PARAM_KONFIGURATION_PFAD,
+                        null);
+
+        if (StringUtils.isNotBlank(configDirectory)) {
+            args.add("--spring.config.additional-location=file:" + configDirectory);
+        }
+
+        return args.toArray(new String[0]);
     }
 }

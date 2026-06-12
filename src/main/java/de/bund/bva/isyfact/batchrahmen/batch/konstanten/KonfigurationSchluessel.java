@@ -95,6 +95,16 @@ public final class KonfigurationSchluessel {
     public static final String KOMMANDO_PARAM_IGNORIERE_RESTART = "ignoriereRestart";
 
     /**
+     * Command line parameters for the config directory.
+     */
+    public static final String KOMMANDO_PARAM_KONFIGURATION_PFAD = "configVerzeichnis";
+
+    /**
+     * Command line parameters for the config directory.
+     */
+    public static final String KOMMANDO_PARAM_LOGBACK_KONFIGURATION = "logbackCfg";
+
+    /**
      * Command line parameter that states that restart is also done on run.
      */
     public static final String KOMMANDO_PARAM_IGNORIERE_LAUF = "ignoriereLauf";
