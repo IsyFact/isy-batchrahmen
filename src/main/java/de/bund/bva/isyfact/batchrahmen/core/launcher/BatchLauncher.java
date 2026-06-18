@@ -1,13 +1,9 @@
 package de.bund.bva.isyfact.batchrahmen.core.launcher;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -44,27 +40,33 @@ import de.bund.bva.isyfact.logging.IsyLogger;
 import de.bund.bva.isyfact.logging.IsyLoggerFactory;
 import de.bund.bva.isyfact.logging.LogKategorie;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+
 /**
  * This class starts a batch (see {@link Batchrahmen} with the transferred configuration.
  * The configuration is done via command line arguments und a property file.
  * <p>
- * The processing logic is divided into a Batchrahmen and a Ausführungsbean.
+ * The processing logic is divided into a Batchrahmen and an executing bean ({@code Ausführungsbean}).
  * See the Detailkonzept Batch of the Migrationsstufe 1.
  * <p>
  * Any further command line parameters and properties can be entered.
- * The command line parameters are added to the properties and overwrite them, if necessary, before they are passed on to the Batchrahmen-Bean.
- * The Batchrahmen-Bean forwards the complete configuration to the Ausfuehrungsbean, which can use it for configuration.
+ * The command line parameters are added to the properties and overwrite them, if necessary, before they are passed on
+ * to the {@link Batchrahmen}-Bean.
+ * The {@link Batchrahmen}-Bean forwards the complete configuration to the executing bean, which can use it for
+ * configuration.
  */
 public class BatchLauncher {
     /**
      * The configuration for Batch-Rahmen.
      */
-    private BatchKonfiguration rahmenKonfiguration;
+    private final BatchKonfiguration rahmenKonfiguration;
 
     /**
      * The protocol, for storing messages und statistics of Batch-Ausfuehrung.
      */
-    private BatchErgebnisProtokoll protokoll;
+    private final BatchErgebnisProtokoll protokoll;
 
     /**
      * Main method for starting batch. This method calls the method {@link #start(String[])} which returns its
@@ -73,7 +75,7 @@ public class BatchLauncher {
      *
      * @param args command line parameters.
      */
-    public static void main(String[] args) {
+    static void main(String[] args) {
         IsyLogger log = IsyLoggerFactory.getLogger(BatchLauncher.class);
         log.info(LogKategorie.JOURNAL, BatchRahmenEreignisSchluessel.EPLBAT00001,
                 "Der direkte Aufruf von BatchLauncher als Main-Class ist veraltet "
@@ -89,7 +91,7 @@ public class BatchLauncher {
      * @param args command line parameters.
      */
     public static void start(String[] args) {
-        System.exit(BatchLauncher.run(args));
+        Runtime.getRuntime().exit(BatchLauncher.run(args));
     }
 
     /**
@@ -100,9 +102,9 @@ public class BatchLauncher {
      */
     public static int run(final String[] args) {
         IsyLogger log = null;
-        BatchKonfiguration rahmenKonfiguration = null;
+        BatchKonfiguration rahmenKonfiguration;
         DefaultBatchErgebnisProtokoll protokoll = null;
-        String ergebnisDatei = null;
+        String ergebnisDatei;
         BatchReturnCode returnCode = BatchReturnCode.FEHLER_ABBRUCH;
         try {
             rahmenKonfiguration = new BatchKonfiguration(args);
@@ -171,7 +173,7 @@ public class BatchLauncher {
         if (log != null) {
             log.error(BatchRahmenEreignisSchluessel.EPLBAT00001, "Fehler bei der Batchausführung.", ex);
         } else {
-            ex.printStackTrace();
+            ex.printStackTrace(System.err);
         }
         String ausnahmeId = "ERROR";
         if (ex instanceof BatchAusfuehrungsException exception1) {
@@ -183,7 +185,7 @@ public class BatchLauncher {
             try {
                 protokoll.ergaenzeMeldung(new VerarbeitungsMeldung(ausnahmeId, MeldungTyp.FEHLER, nachricht));
             } catch (BatchrahmenProtokollException protokollEx) {
-                System.err.println("Die Fehlermeldung " + protokollEx.toString()
+                System.err.println("Die Fehlermeldung " + protokollEx
                         + " konnte nicht in das Ergebnisprotokoll geschrieben werden.");
             }
         }
@@ -196,15 +198,15 @@ public class BatchLauncher {
      * @return String including stack trace without line breaks.
      */
     private static String exceptionToString(Throwable t) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        String exceptionString = "";
-        try {
-            t.printStackTrace(new PrintStream(out, false, StandardCharsets.UTF_8.name()));
-            exceptionString = out.toString(StandardCharsets.UTF_8.name()).replaceAll("\\r{0,1}\\n", " | ");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+             PrintStream printStream = new PrintStream(byteArrayOutputStream, false, StandardCharsets.UTF_8)) {
+            printStream.println(t.getClass().getSimpleName() + ": " + t.getMessage());
+            t.printStackTrace(printStream);
+            printStream.println();
+            return byteArrayOutputStream.toString(StandardCharsets.UTF_8).replaceAll("\\r?\\n", " | ");
+        } catch (IOException e) {
+            return t.getClass().getSimpleName() + ": " + t.getMessage();
         }
-        return exceptionString;
     }
 
     /**
@@ -251,7 +253,7 @@ public class BatchLauncher {
      * Creates a new instance and sets the configuration.
      *
      * @param rahmenKonfiguration configuration for Batch-Rahmen.
-     * @param protokoll           ErgebinsProtokoll.
+     * @param protokoll           The resulting protocol.
      */
     public BatchLauncher(BatchKonfiguration rahmenKonfiguration, BatchErgebnisProtokoll protokoll) {
         this.rahmenKonfiguration = rahmenKonfiguration;
@@ -261,13 +263,13 @@ public class BatchLauncher {
     /**
      * Creates the spring contexts for the application and the Batchrahmen.
      * Starts the Batchrahmen-Bean using the method.
-     *
+     * <p>
      * {@link Batchrahmen#runBatch(BatchKonfiguration, BatchErgebnisProtokoll)}.
      *
      * @throws BatchAusfuehrungsException When an error occurs during batch execution.
      */
     private void launch() throws BatchAusfuehrungsException {
-        List<Class> configs = new ArrayList<>();
+        List<Class<?>> configs = new ArrayList<>();
         try {
             for (final String name : rahmenKonfiguration.getAnwendungSpringKonfigFiles()) {
                 configs.add(Class.forName(name));
