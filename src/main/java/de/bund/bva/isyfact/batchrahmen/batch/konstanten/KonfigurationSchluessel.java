@@ -9,9 +9,9 @@ public final class KonfigurationSchluessel {
         // class with config keys should not be initialized
     }
 
-    /***************************************************************************
-     * PROPERTY - PARAMETER *
-     **************************************************************************/
+    // ***************************************************************************
+    // PROPERTY - PARAMETER
+    // ***************************************************************************
 
     /**
      * Property name for the Batchrahmen-bean.
@@ -70,9 +70,9 @@ public final class KonfigurationSchluessel {
      */
     public static final String PROPERTY_BATCH_OAUTH2_MINIMUM_TOKEN_VALIDITY = "batch.oauth2MinimumTokenValidity";
 
-    /***************************************************************************
-     * COMMAND LINE PARAMETERS *
-     **************************************************************************/
+    // ***************************************************************************
+    // COMMAND LINE PARAMETERS
+    // ***************************************************************************
 
     /**
      * Command line parameters for the property file.
@@ -93,6 +93,16 @@ public final class KonfigurationSchluessel {
      * Command line parameter for restarting even if aborted.
      */
     public static final String KOMMANDO_PARAM_IGNORIERE_RESTART = "ignoriereRestart";
+
+    /**
+     * Command line parameters for the config directory.
+     */
+    public static final String KOMMANDO_PARAM_KONFIGURATION_PFAD = "configVerzeichnis";
+
+    /**
+     * Command line parameters for the config directory.
+     */
+    public static final String KOMMANDO_PARAM_LOGBACK_KONFIGURATION = "logbackCfg";
 
     /**
      * Command line parameter that states that restart is also done on run.
