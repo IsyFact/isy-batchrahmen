@@ -1,16 +1,26 @@
-# 5.0.2
+# 5.1.0
 ### Features
-- `IFS-5259`: Maximale Anzahl automatischer Neustarts für fehlerhafte Batches konfigurierbar.
-  * Über den Konfigurationsparameter `Batchrahmen.MaxWiederholungen` kann eine Obergrenze für automatische Neustarts festgelegt werden.
-  * Bei Überschreitung wird eine `BatchrahmenMaxWiederholungenException` geworfen, die nur auf Info-Niveau geloggt wird.
-  * Ist der Parameter nicht oder auf eine negative Nummer gesetzt, gibt es keine Begrenzung der Neustarts.
+- `IFS-5512` prepare isy-batchrahmen for usage as executable jar
 
 ### Bug Fixes
-- `IFS-4753`: Änderung der Konfigurationsreihenfolge.
-  * BatchSecurityConfiguration wird nach Anwendung und BatchRahmen Konfiguration geladen.
-  * Beans mit der `@ConditionalOnMissingBean(...)` Annotation können wie erwartet überschrieben werden.
+- `IFS-5834` Ein Batch brach mit `ORA-00942` ab, wenn die Tabelle `BATCHSTATUS_KONFIGURATIONSPARAMETER` nicht vorhanden war.
+  - Der Zugriff auf die Tabelle erfolgt jetzt nur, wenn das Feature `Batchrahmen.MaxWiederholungen` tatsächlich konfiguriert ist.
+  - Die Tabelle ist nun in den SQL-Skripten dokumentiert.
+
+### DEPENDENCY UPGRADES
+- Update org.codehaus.mojo:flatten-maven-plugin von Version 1.7.3 auf 1.8.0
+- Update org.apache.maven.plugins:maven-jar-plugin von Version 3.5.0 auf 3.5.1
+- Update org.sonatype.central:central-publishing-maven-plugin von Version 0.10.0 auf 0.11.0
+- Update org.springframework.boot:spring-boot-dependencies von Version 4.0.6 auf 4.1.0
+- Update com.github.spotbugs:spotbugs-maven-plugin von Version 4.9.8.4 auf 4.10.3.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_build_template.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/commit_message_checker_template.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/docs_build_template.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/dependabot_auto_merge_template.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/semgrep.yml von Version 2.5.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_dependency_scan_template.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/dependency_review_template.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/next_version.yml von Version 2.3.0 auf 3.0.0
+- Update IsyFact/isy-github-actions-templates/.github/workflows/maven_deploy_template.yml von Version 2.3.0 auf 3.0.0
 
 ### BREAKING CHANGES
-- `IFS-5263`: Update auf Spring Boot 4
-  - Password-Authorization wird nicht mehr unterstützt. Es ist stattdessen Client-Secret-Authorization zu nutzen. 
-    Hierfür sind die betroffenden Accounts auf Service-Accounts umzustellen.
